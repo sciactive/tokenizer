@@ -5,36 +5,41 @@ import { splitn } from '@sciactive/splitn';
 import { sciactive } from './stopwords.js';
 
 export class Tokenizer {
-  stopWords;
+  public EngMorpho: any;
+  public stopWords: { [k: string]: number };
 
-  constructor({ stopWords = sciactive } = {}) {
+  constructor({
+    stopWords = sciactive,
+    stemmingAlgorithm = 'porter',
+  }: {
+    stopWords?: { [k: string]: number };
+    stemmingAlgorithm?: 'porter' | 'lancaster';
+  } = {}) {
     this.stopWords = stopWords;
+    this.EngMorpho = JsLingua.gserv('morpho', 'eng');
+
+    this.EngMorpho.sstem(stemmingAlgorithm);
   }
 
-  detailedTokenize(input) {
-    let EngMorpho = JsLingua.gserv('morpho', 'eng');
-
-    const words = EngMorpho.gwords(
+  detailedTokenize(input: string) {
+    const words: string[] = this.EngMorpho.gwords(
       input
         .trim()
         .replace(/(\w),(\w)/g, '$1 $2')
         .replace(/(\d),(\w)/g, '$1 $2')
         .replace(/(\w),(\d)/g, '$1 $2'),
     )
-      .filter((word) => !!word.match(/\w/))
-      .map((word) =>
+      .filter((word: string | null) => word != null && !!word.match(/\w/))
+      .map((word: string) =>
         word
           .replace(/[)\]}:;.?!…‽"']$/g, () => '')
           .replace(/^[([{"']/g, () => ''),
       )
-      .filter((word) => word != null && word != '');
+      .filter((word: string) => word != '');
 
-    EngMorpho.sstem('porter');
-    //EngMorpho.sstem('lancaster');
-
-    let outputOrig = [];
-    let outputStem = [];
-    let outputTokens = [];
+    let outputOrig: string[] = [];
+    let outputStem: string[] = [];
+    let outputTokens: [string, boolean][][] = [];
 
     for (let word of words) {
       const orig = word.toLowerCase().trim();
@@ -45,21 +50,22 @@ export class Tokenizer {
       outputOrig.push(orig);
 
       if (/^\S*@\S*$/.test(word)) {
-        let [user, domain] = splitn(orig, '@', 2);
-        let tokens = [];
+        let [user, domainandpossiblyquery] = splitn(orig, '@', 2);
+        const [domain, _querypart] = splitn(domainandpossiblyquery, '?', 2);
+        let tokens: [string, boolean][] = [];
         if (user.startsWith('mailto:')) {
           const [proto, realuser] = splitn(user, ':', 2);
           tokens = [
-            [proto, false],
-            [realuser, false],
-            [domain, false],
-            [orig, true],
+            [proto, true],
+            [realuser, true],
+            [domain, true],
+            [orig, false],
           ];
         } else {
           tokens = [
-            [user, false],
-            [domain, false],
-            [orig, true],
+            [user, true],
+            [domain, true],
+            [orig, false],
           ];
         }
 
@@ -68,24 +74,29 @@ export class Tokenizer {
       } else if (/^\w+:\/\/\S+$/.test(word)) {
         const [proto, domainpath] = splitn(orig, '://', 2);
         const [domain, path] = splitn(domainpath, '/', 2);
-        const tokens = [
-          [proto, false],
-          [domain, false],
+        const tokens: [string, boolean][] = [
+          [proto, true],
+          [domain, true],
         ];
         if (path) {
-          tokens.push([path, false]);
+          tokens.push([path, true]);
         }
-        tokens.push([orig, true]);
+        tokens.push([orig, false]);
 
         outputStem.push(orig);
         outputTokens.push(tokens);
       } else {
-        let newWords = EngMorpho.gwords(EngMorpho.norm(EngMorpho.stem(word)))
-          .map((word) => EngMorpho.stem(word).toLowerCase())
-          .map((word) => word.split('-'))
+        let newWords: string[] = this.EngMorpho.gwords(
+          this.EngMorpho.norm(this.EngMorpho.stem(word)),
+        )
+          .filter((word: string | null) => word != null && word != '')
+          .map(
+            (word: string) => this.EngMorpho.stem(word).toLowerCase() as string,
+          )
+          .map((word: string) => word.split('-'))
           .flat()
-          .map((word) => word.replace(/\W+/, () => '').trim())
-          .filter((word) => word != '');
+          .map((word: string) => word.replace(/\W+/, () => '').trim())
+          .filter((word: string) => word != '');
 
         newWords = newWords
           .map((curWord) => {
@@ -106,26 +117,35 @@ export class Tokenizer {
         if (newWords.length || orig != '') {
           if (newWords.includes(orig) || orig == '') {
             outputTokens.push(
-              newWords.map((newWord) => [newWord, newWord === orig]),
+              newWords.map((newWord) => [newWord, newWord !== orig]),
             );
           } else {
             outputTokens.push([
-              ...newWords.map((newWord) => [newWord, false]),
-              [orig, true],
+              ...newWords.map(
+                (newWord) => [newWord, true] as [string, boolean],
+              ),
+              [orig, false],
             ]);
           }
         }
       }
     }
 
+    const resultTokens: {
+      input: string;
+      token: number;
+      position: number;
+      stem: boolean;
+    }[][] = [];
     for (let i = 0; i < outputTokens.length; i++) {
+      resultTokens[i] = [];
       const tokens = outputTokens[i];
       for (let j = 0; j < tokens.length; j++) {
-        tokens[j] = {
-          _input: tokens[j][0],
+        resultTokens[i][j] = {
+          input: tokens[j][0],
           token: CRC32.str(tokens[j][0], 0),
           position: i + 1,
-          verbatim: tokens[j][1],
+          stem: tokens[j][1],
         };
       }
     }
@@ -133,17 +153,17 @@ export class Tokenizer {
     return {
       original: outputOrig,
       stemmed: outputStem,
-      tokens: outputTokens,
+      tokens: resultTokens,
     };
   }
 
-  tokenize(input) {
+  tokenize(input: string) {
     return this.detailedTokenize(input)
       .tokens.flat()
       .map((token) => ({
         token: token.token,
         position: token.position,
-        verbatim: token.verbatim,
+        stem: token.stem,
       }));
   }
 }
