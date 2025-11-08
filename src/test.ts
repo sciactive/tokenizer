@@ -1,4 +1,6 @@
-import { Tokenizer } from "./Tokenizer.mjs";
+import util from 'node:util';
+
+import { Tokenizer } from './Tokenizer.js';
 
 const input = `
 For the past two years, I have been running around like a first-born chicken with its head cut off.
@@ -117,11 +119,14 @@ const tokenizer = new Tokenizer();
 const detailed = tokenizer.detailedTokenize(input);
 const tokens = tokenizer.tokenize(input);
 
-console.log("Input:", input);
-console.log("\nOriginal:", detailed.original.join(" "));
-console.log("\nStemmed:", detailed.stemmed.join(" "));
+console.log('Input:', input);
+console.log('\nOriginal:', detailed.original.join(' '));
+console.log('\nStemmed:', detailed.stemmed.join(' '));
 console.log(
-  "\nDetailed Tokens:\n ",
-  detailed.tokens.map((tokenSet) => JSON.stringify(tokenSet)).join("\n  ")
+  '\nDetailed Tokens:\n ',
+  detailed.tokens.map((tokenSet) => JSON.stringify(tokenSet)).join('\n  '),
 );
-console.log("\nTokens:", JSON.stringify(tokens));
+console.log(
+  '\nTokens:',
+  util.inspect(tokens, { showHidden: false, depth: null, colors: false }),
+);

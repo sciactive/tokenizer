@@ -1,4 +1,4 @@
-import JsLingua from "jslingua";
+import JsLingua from 'jslingua';
 
 /**
  * Custom list of stop words for SciActive.
@@ -63,8 +63,8 @@ export const sciactive = {
   "he'll": 1,
   "he's": 1,
   // her: 1,
-  here: 1,
-  "here's": 1,
+  // here: 1,
+  // "here's": 1,
   // hers: 1,
   // herself: 1,
   // him: 1,
@@ -367,4 +367,4 @@ export const ranks = {
 /**
  * JsLingua's default list.
  */
-export const jslingua = JsLingua.gserv("morpho", "eng").stop_words;
+export const jslingua = JsLingua.gserv('morpho', 'eng').stop_words;

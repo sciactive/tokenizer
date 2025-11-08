@@ -1,10 +1,29 @@
 {
   "name": "@sciactive/tokenizer",
   "version": "1.0.0",
-  "description": "Tokenize string input into 32-bit numbers (for full text search).",
-  "main": "index.js",
+  "description": "Tokenize string input into 32-bit integers (for full text search and natural language processing).",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "keywords": [
+    "tokenize",
+    "tokenizer",
+    "token",
+    "full text search",
+    "fts",
+    "natural lanuage processing",
+    "nlp"
+  ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "format": "prettier --write --ignore-path .prettierignore --ignore-unknown .",
+    "lint": "prettier --check --ignore-path .prettierignore --ignore-unknown .",
+    "prepare": "husky && npm run lint && npm run clean && npm run build",
+    "clean": "test -d dist && rm -r dist || true",
+    "build": "tsc",
+    "test": "jest",
+    "test:watch": "jest --watch"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "repository": {
     "type": "git",
@@ -15,6 +34,18 @@
     "url": "https://github.com/sciactive/tokenizer/issues"
   },
   "license": "Apache-2.0",
+  "devDependencies": {
+    "@commitlint/cli": "^20.1.0",
+    "@commitlint/config-conventional": "^20.0.0",
+    "@tsconfig/recommended": "^1.0.11",
+    "@types/jest": "^30.0.0",
+    "husky": "^9.1.7",
+    "jest": "^30.2.0",
+    "lint-staged": "^16.2.6",
+    "prettier": "^3.6.2",
+    "ts-jest": "^29.4.5",
+    "typescript": "^5.9.3"
+  },
   "dependencies": {
     "@sciactive/splitn": "^3.1.0",
     "crc-32": "^1.2.2",
