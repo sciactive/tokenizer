@@ -2,6 +2,7 @@
   "name": "@sciactive/tokenizer",
   "version": "1.0.0",
   "description": "Tokenize string input into 32-bit integers (for full text search and natural language processing).",
+  "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "keywords": [
@@ -44,6 +45,7 @@
     "lint-staged": "^16.2.6",
     "prettier": "^3.6.2",
     "ts-jest": "^29.4.5",
+    "ts-node": "^10.9.2",
     "typescript": "^5.9.3"
   },
   "dependencies": {

@@ -2,8 +2,12 @@
   "extends": "@tsconfig/recommended/tsconfig.json",
 
   "compilerOptions": {
+    "module": "ES2022",
+    "moduleResolution": "node",
+    "lib": ["ES2022"],
+    "target": "ES2022",
     "noImplicitAny": true,
-    "removeComments": true,
+    "removeComments": false,
     "sourceMap": true,
     "outDir": "dist",
     "resolveJsonModule": true,
