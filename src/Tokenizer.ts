@@ -5,24 +5,40 @@ import { splitn } from '@sciactive/splitn';
 import { sciactive } from './stopwords.js';
 
 export class Tokenizer {
-  public EngMorpho: any;
+  public Morpho: any;
   public stopWords: { [k: string]: number };
+
+  static listLanguages(): string[] {
+    return JsLingua.llang('morpho');
+  }
+
+  static listStemmingAlgorithms(language: string): string[] {
+    const Morpho = JsLingua.gserv('morpho', language);
+    return Morpho.lstem();
+  }
+
+  static getLanguageStopWords(language: string): { [k: string]: number } {
+    const Morpho = JsLingua.gserv('morpho', language);
+    return Morpho.stop_words;
+  }
 
   constructor({
     stopWords = sciactive,
+    language = 'eng',
     stemmingAlgorithm = 'porter',
   }: {
     stopWords?: { [k: string]: number };
-    stemmingAlgorithm?: 'porter' | 'lancaster';
+    language?: string;
+    stemmingAlgorithm?: string;
   } = {}) {
     this.stopWords = stopWords;
-    this.EngMorpho = JsLingua.gserv('morpho', 'eng');
+    this.Morpho = JsLingua.gserv('morpho', language);
 
-    this.EngMorpho.sstem(stemmingAlgorithm);
+    this.Morpho.sstem(stemmingAlgorithm);
   }
 
   detailedTokenize(input: string) {
-    const words: string[] = this.EngMorpho.gwords(
+    const words: string[] = this.Morpho.gwords(
       input
         .trim()
         .replace(/(\w),(\w)/g, '$1 $2')
@@ -86,13 +102,11 @@ export class Tokenizer {
         outputStem.push(orig);
         outputTokens.push(tokens);
       } else {
-        let newWords: string[] = this.EngMorpho.gwords(
-          this.EngMorpho.norm(this.EngMorpho.stem(word)),
+        let newWords: string[] = this.Morpho.gwords(
+          this.Morpho.norm(this.Morpho.stem(word)),
         )
           .filter((word: string | null) => word != null && word != '')
-          .map(
-            (word: string) => this.EngMorpho.stem(word).toLowerCase() as string,
-          )
+          .map((word: string) => this.Morpho.stem(word).toLowerCase() as string)
           .map((word: string) => word.split('-'))
           .flat()
           .map((word: string) => word.replace(/\W+/, () => '').trim())

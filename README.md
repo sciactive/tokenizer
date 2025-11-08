@@ -104,8 +104,9 @@ const detailed = tokenizer.detailedTokenize(input);
 
 The config object includes the following options:
 
-- `stopWords`: The stop word set. Defaults to the `sciactive` set.
-- `stemmingAlgorithm`: The stemming algorithm to use. Defaults to `'porter'`.
+- `stopWords`: The stop word list. Defaults to the `sciactive` list.
+- `language`: A language from `listLanguages()`. Defaults to `'eng'`.
+- `stemmingAlgorithm`: A stemming algorithm from `listStemmingAlgorithms(language)`. Defaults to `'porter'`.
 
 ## `tokenize`
 
@@ -114,6 +115,35 @@ This function returns a simplified output of just each token, its position, and 
 ## `detailedTokenize`
 
 This function gives more detail, including the original tokens, the stemmed versions, and an array of the sets of tokens. Each set will include the unstemmed version in the last position, and any stemmed versions before it.
+
+## Other Languages
+
+To use the tokenizer for other languages, you can use the static functions to see what other languages and stemming algorithms are available and get the stop list for a language. Don't forget to set the stop word list for the language you're using.
+
+Note that the stop word list for English returned by `getLanguageStopWords('eng')` is much longer than the default stop word list (the `sciactive` list).
+
+```ts
+import { Tokenizer } from '@sciactive/tokenizer';
+
+// Get the available languages and features for your language.
+const supportedLanguages = Tokenizer.listLanguages();
+const frenchStemmingAlgorithms = Tokenizer.listStemmingAlgorithms('fra');
+const frenchStopWordList = Tokenizer.getLanguageStopWords('fra');
+
+// You must set all of `language`, `stemmingAlgorithm`, and `stopWords` for non-English support.
+const tokenizer = new Tokenizer({
+  language: 'fra',
+  stemmingAlgorithm: 'snowball',
+  stopWords: Tokenizer.getLanguageStopWords('fra'),
+});
+
+const tokens = tokenizer.tokenize(
+  `J'ai envie de Taco Bell. Je vais aller en voiture au restaurant et acheter toute la nourriture.`,
+);
+
+// Original: j'ai envie taco bell vais aller voiture restaurant acheter toute nourriture
+// Stemmed: jai envi taco bel vais aller voitur restaur achet tout nourritur
+```
 
 # License
 

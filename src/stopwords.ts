@@ -1,5 +1,3 @@
-import JsLingua from 'jslingua';
-
 /**
  * Custom list of stop words for SciActive.
  *
@@ -186,6 +184,8 @@ export const sciactive = {
 
 /**
  * List from https://www.ranks.nl/stopwords
+ *
+ * It's shorter than JsLingua's default list.
  */
 export const ranks = {
   a: 1,
@@ -363,8 +363,3 @@ export const ranks = {
   yourself: 1,
   yourselves: 1,
 };
-
-/**
- * JsLingua's default list.
- */
-export const jslingua = JsLingua.gserv('morpho', 'eng').stop_words;

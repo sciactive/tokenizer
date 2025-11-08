@@ -2,6 +2,7 @@ import util from 'node:util';
 
 import { Tokenizer } from './Tokenizer.js';
 
+/*
 const input = `
 For the past two years, I have been running around like a first-born chicken with its head cut off.
 I ain't gonna take it no more!
@@ -12,6 +13,7 @@ Address: hperrin+myself@example.com
 Website: https://example.com/ThisIsAURL/?querypart=SUCCESS%20MAN
 And there you have it, papácita.
 `;
+*/
 
 /*
 const input = `
@@ -115,7 +117,13 @@ Thank you for choosing TicketWeb. [http://email.t.ticketweb.com/c/14e9fff1-0cb6-
 `;
 */
 
-const tokenizer = new Tokenizer();
+const input = `J'ai envie de Taco Bell. Je vais aller en voiture au restaurant et acheter toute la nourriture.`;
+
+const tokenizer = new Tokenizer({
+  language: 'fra',
+  stemmingAlgorithm: 'snowball',
+  stopWords: Tokenizer.getJsLinguaStopWords('fra'),
+});
 const detailed = tokenizer.detailedTokenize(input);
 const tokens = tokenizer.tokenize(input);
 
