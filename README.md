@@ -4,14 +4,20 @@ Tokenize string input into 32-bit integers (for full text search and natural lan
 
 It works by removing stop words, normalizing text, stemming each word, then tokenizing both the original and the stemmed version of the word. It returns the tokens, along with their position in the text (1 indexed), and whether the token is a stemmed version. Stemmed versions will have the same position as their unstemmed counterparts.
 
-For email addresses, it will provide the username part and the domain part as stemmed tokens, then the whole address as an unstemmed token.
+For email addresses, it will provide the username, domain parts, and the whole domain as stemmed tokens, then the whole address as an unstemmed token.
 
-For URLs, it will provide the protocol, domain, and path as stemmed tokens, then the whole address as an unstemmed token.
+For URLs, it will provide the protocol, domain parts, whole domain, and path as stemmed tokens, then the whole address as an unstemmed token.
+
+SciActive Tokenizer also includes a search query parser that supports double quotes for exact (unstemmed) sequential matches, single quotes for sequential matches, "or" as an or operator, and "-" as a not operator.
 
 ## Usage
 
 ```ts
 import { Tokenizer } from '@sciactive/tokenizer';
+
+//
+// Tokenizing text to go into an index.
+//
 
 const input = 'A natural language string input goes here.';
 
@@ -36,68 +42,99 @@ const detailed = tokenizer.detailedTokenize(input);
 //   stemmed: [ 'natur', 'languag', 'string', 'input', 'goe', 'here' ],
 //   tokens: [
 //     [
-//       {
-//         input: 'natur',
-//         token: -603851912,
-//         position: 1,
-//         stem: true
-//       },
-//       {
-//         input: 'natural',
-//         token: -1167464141,
-//         position: 1,
-//         stem: false
-//       }
+//       { input: 'natur', token: -603851912, position: 1, stem: true },
+//       { input: 'natural', token: -1167464141, position: 1, stem: false }
 //     ],
 //     [
-//       {
-//         input: 'languag',
-//         token: 1865099040,
-//         position: 2,
-//         stem: true
-//       },
-//       {
-//         input: 'language',
-//         token: -723816011,
-//         position: 2,
-//         stem: false
-//       }
+//       { input: 'languag', token: 1865099040, position: 2, stem: true },
+//       { input: 'language', token: -723816011, position: 2, stem: false }
 //     ],
 //     [
-//       {
-//         input: 'string',
-//         token: -1631669591,
-//         position: 3,
-//         stem: false
-//       }
+//       { input: 'string', token: -1631669591, position: 3, stem: false }
 //     ],
 //     [
-//       {
-//         input: 'input',
-//         token: -668454185,
-//         position: 4,
-//         stem: false
-//       }
+//       { input: 'input', token: -668454185, position: 4, stem: false }
 //     ],
 //     [
-//       {
-//         input: 'goe',
-//         token: 1835329032,
-//         position: 5,
-//         stem: true
-//       },
+//       { input: 'goe', token: 1835329032, position: 5, stem: true },
 //       { input: 'goes', token: 364389343, position: 5, stem: false }
 //     ],
 //     [
-//       {
-//         input: 'here',
-//         token: -1323595880,
-//         position: 6,
-//         stem: false
-//       }
+//       { input: 'here', token: -1323595880, position: 6, stem: false }
 //     ]
 //   ]
 // }
+
+//
+// Parsing a query to search the index.
+//
+
+const query = 'this is an example of a search string';
+
+const parsedQuery = tokenizer.parseSearchQuery(query);
+// [
+//   { type: 'token', input: 'exampl', token: -1997076268, nostemmed: false },
+//   { type: 'token', input: 'search', token: -1259283545, nostemmed: false },
+//   { type: 'token', input: 'string', token: -1631669591, nostemmed: false },
+// ]
+
+const query2 = "'from example.com to example.net'";
+
+const parsedQuery2 = tokenizer.parseSearchQuery(query2);
+// [
+//   {
+//     type: 'series',
+//     tokens: [
+//       { input: 'example.com', token: -1225109831, nostemmed: false },
+//       { input: 'example.net', token: 547790240, nostemmed: false },
+//     ],
+//   },
+// ]
+
+const query3 = '"delicious" -"strawberries"';
+
+const parsedQuery3 = tokenizer.parseSearchQuery(query3);
+// [
+//   { type: 'token', input: 'delicious', token: 1544783590, nostemmed: true },
+//   {
+//     type: 'not',
+//     operand: {
+//       type: 'token',
+//       input: 'strawberries',
+//       token: -377504889,
+//       nostemmed: true,
+//     },
+//   },
+// ]
+
+const query4 = 'delicious or strawberries or blueberries';
+
+const parsedQuery4 = tokenizer.parseSearchQuery(query4);
+// [
+//   {
+//     type: 'or',
+//     operands: [
+//       {
+//         type: 'token',
+//         input: 'delici',
+//         token: 1060982110,
+//         nostemmed: false,
+//       },
+//       {
+//         type: 'token',
+//         input: 'strawberri',
+//         token: 389051739,
+//         nostemmed: false,
+//       },
+//       {
+//         type: 'token',
+//         input: 'blueberri',
+//         token: 1688810679,
+//         nostemmed: false,
+//       },
+//     ],
+//   },
+// ]
 ```
 
 ## Options
