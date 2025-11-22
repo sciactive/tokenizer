@@ -1,4 +1,5 @@
 import {
+  DECLARATION_OF_INDEPENDENCE,
   LONG_REALISTIC_INPUT,
   LONG_REALISTIC_INPUT_DETAILED,
   LONG_REALISTIC_INPUT_TOKENS,
@@ -591,7 +592,7 @@ And there you have it, papácita.
     );
   });
 
-  it('parses simple search queries', () => {
+  it('parses search queries', () => {
     let input = 'delicious strawberries';
 
     const tokenizer = new Tokenizer();
@@ -713,8 +714,18 @@ And there you have it, papácita.
       {
         type: 'series',
         tokens: [
-          { input: 'example.com', token: -1225109831, nostemmed: false },
-          { input: 'example.net', token: 547790240, nostemmed: false },
+          {
+            type: 'token',
+            input: 'example.com',
+            token: -1225109831,
+            nostemmed: false,
+          },
+          {
+            type: 'token',
+            input: 'example.net',
+            token: 547790240,
+            nostemmed: false,
+          },
         ],
       },
     ]);
@@ -727,5 +738,228 @@ And there you have it, papácita.
       { type: 'token', input: 'search', token: -1259283545, nostemmed: false },
       { type: 'token', input: 'string', token: -1631669591, nostemmed: false },
     ]);
+  });
+
+  it('parses invalid search queries', () => {
+    let input = 'delicious =+ strawberries';
+
+    const tokenizer = new Tokenizer();
+
+    expect(tokenizer.parseSearchQuery(input)).toEqual([
+      { type: 'token', input: 'delici', token: 1060982110, nostemmed: false },
+      {
+        type: 'token',
+        input: 'strawberri',
+        token: 389051739,
+        nostemmed: false,
+      },
+    ]);
+
+    input = 'delicious strawberries"';
+
+    expect(tokenizer.parseSearchQuery(input)).toEqual([
+      { type: 'token', input: 'delici', token: 1060982110, nostemmed: false },
+      {
+        type: 'token',
+        input: 'strawberri',
+        token: 389051739,
+        nostemmed: false,
+      },
+    ]);
+  });
+
+  it('can search strings correctly', () => {
+    const tokenizer = new Tokenizer();
+
+    expect(
+      tokenizer.searchString(
+        'united state of america',
+        DECLARATION_OF_INDEPENDENCE,
+      ),
+    ).toEqual(true);
+
+    expect(
+      tokenizer.searchString(
+        'united state of arcadia',
+        DECLARATION_OF_INDEPENDENCE,
+      ),
+    ).toEqual(false);
+
+    expect(
+      tokenizer.searchString('"united states"', DECLARATION_OF_INDEPENDENCE),
+    ).toEqual(true);
+
+    expect(
+      tokenizer.searchString('"united state"', DECLARATION_OF_INDEPENDENCE),
+    ).toEqual(false);
+
+    expect(
+      tokenizer.searchString(
+        "'free and independence state'",
+        DECLARATION_OF_INDEPENDENCE,
+      ),
+    ).toEqual(true);
+
+    expect(
+      tokenizer.searchString(
+        '"common kindred to disavow these usurpations"',
+        DECLARATION_OF_INDEPENDENCE,
+      ),
+    ).toEqual(true);
+
+    expect(
+      tokenizer.searchString('pickle', DECLARATION_OF_INDEPENDENCE),
+    ).toEqual(false);
+
+    expect(
+      tokenizer.searchString('-pickle', DECLARATION_OF_INDEPENDENCE),
+    ).toEqual(true);
+
+    expect(
+      tokenizer.searchString('pickle or united', DECLARATION_OF_INDEPENDENCE),
+    ).toEqual(true);
+
+    expect(
+      tokenizer.searchString(
+        "'untied statutes' or 'captive audience'",
+        DECLARATION_OF_INDEPENDENCE,
+      ),
+    ).toEqual(false);
+
+    expect(
+      tokenizer.searchString(
+        "'unite state' or 'captive audience'",
+        DECLARATION_OF_INDEPENDENCE,
+      ),
+    ).toEqual(true);
+
+    expect(
+      tokenizer.searchString(
+        '"unite state" or \'captive audience\'',
+        DECLARATION_OF_INDEPENDENCE,
+      ),
+    ).toEqual(false);
+
+    expect(
+      tokenizer.searchString(
+        '"unite state" or -\'captive audience\'',
+        DECLARATION_OF_INDEPENDENCE,
+      ),
+    ).toEqual(true);
+
+    expect(
+      tokenizer.searchString(
+        '"united states" or \'captive audience\'',
+        DECLARATION_OF_INDEPENDENCE,
+      ),
+    ).toEqual(true);
+
+    expect(
+      tokenizer.searchString(
+        '\'captive audience\' or "united states"',
+        DECLARATION_OF_INDEPENDENCE,
+      ),
+    ).toEqual(true);
+
+    expect(
+      tokenizer.searchString(
+        '"united fishing states"',
+        DECLARATION_OF_INDEPENDENCE,
+      ),
+    ).toEqual(false);
+
+    expect(
+      tokenizer.searchString('pickle or -fishing', DECLARATION_OF_INDEPENDENCE),
+    ).toEqual(true);
+
+    expect(
+      tokenizer.searchString('pickle or -taxes', DECLARATION_OF_INDEPENDENCE),
+    ).toEqual(false);
+
+    expect(
+      tokenizer.searchString('self-evident jury', DECLARATION_OF_INDEPENDENCE),
+    ).toEqual(true);
+
+    expect(
+      tokenizer.searchString('olishing', DECLARATION_OF_INDEPENDENCE),
+    ).toEqual(false);
+  });
+
+  it('handles search strings from the readme', () => {
+    const tokenizer = new Tokenizer();
+
+    expect(
+      tokenizer.searchString('red', 'the big red ball rolls down the driveway'),
+    ).toEqual(true);
+
+    expect(
+      tokenizer.searchString(
+        'blue',
+        'the big red ball rolls down the driveway',
+      ),
+    ).toEqual(false);
+
+    expect(
+      tokenizer.searchString(
+        'red or blue',
+        'the big red ball rolls down the driveway',
+      ),
+    ).toEqual(true);
+
+    expect(
+      tokenizer.searchString(
+        '-blue',
+        'the big red ball rolls down the driveway',
+      ),
+    ).toEqual(true);
+
+    expect(
+      tokenizer.searchString(
+        'big red ball',
+        'the big red ball rolls down the driveway',
+      ),
+    ).toEqual(true);
+
+    expect(
+      tokenizer.searchString(
+        'big red driveway',
+        'the big red ball rolls down the driveway',
+      ),
+    ).toEqual(true);
+
+    expect(
+      tokenizer.searchString(
+        '"big red driveway"',
+        'the big red ball rolls down the driveway',
+      ),
+    ).toEqual(false);
+
+    expect(
+      tokenizer.searchString(
+        '"big red ball"',
+        'the big red ball rolls down the driveway',
+      ),
+    ).toEqual(true);
+
+    expect(
+      tokenizer.searchString(
+        '"big red balls"',
+        'the big red ball rolls down the driveway',
+      ),
+    ).toEqual(false);
+
+    expect(
+      tokenizer.searchString(
+        "'big red balls'",
+        'the big red ball rolls down the driveway',
+      ),
+    ).toEqual(true);
+
+    expect(
+      tokenizer.searchString(
+        "'red big ball'",
+        'the big red ball rolls down the driveway',
+      ),
+    ).toEqual(false);
   });
 });

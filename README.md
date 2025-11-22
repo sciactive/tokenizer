@@ -10,6 +10,8 @@ For URLs, it will provide the protocol, domain parts, whole domain, and path as 
 
 SciActive Tokenizer also includes a search query parser that supports double quotes for exact (unstemmed) sequential matches, single quotes for sequential matches, "or" as an or operator, and "-" as a not operator.
 
+It also offers a `searchString` function that takes a search query and an input string, and returns true if the search query matches the input string.
+
 ## Usage
 
 ```ts
@@ -85,8 +87,18 @@ const parsedQuery2 = tokenizer.parseSearchQuery(query2);
 //   {
 //     type: 'series',
 //     tokens: [
-//       { input: 'example.com', token: -1225109831, nostemmed: false },
-//       { input: 'example.net', token: 547790240, nostemmed: false },
+//       {
+//         type: 'token',
+//         input: 'example.com',
+//         token: -1225109831,
+//         nostemmed: false,
+//       },
+//       {
+//         type: 'token',
+//         input: 'example.net',
+//         token: 547790240,
+//         nostemmed: false,
+//       },
 //     ],
 //   },
 // ]
@@ -135,6 +147,67 @@ const parsedQuery4 = tokenizer.parseSearchQuery(query4);
 //     ],
 //   },
 // ]
+
+//
+// Searching a string with a query.
+//
+
+tokenizer.searchString('red', 'the big red ball rolls down the driveway');
+// true
+
+tokenizer.searchString('blue', 'the big red ball rolls down the driveway');
+// false
+
+tokenizer.searchString(
+  'red or blue',
+  'the big red ball rolls down the driveway',
+);
+// true
+
+tokenizer.searchString('-blue', 'the big red ball rolls down the driveway');
+// true
+
+tokenizer.searchString(
+  'big red ball',
+  'the big red ball rolls down the driveway',
+);
+// true
+
+tokenizer.searchString(
+  'big red driveway',
+  'the big red ball rolls down the driveway',
+);
+// true
+
+tokenizer.searchString(
+  '"big red driveway"',
+  'the big red ball rolls down the driveway',
+);
+// false
+
+tokenizer.searchString(
+  '"big red ball"',
+  'the big red ball rolls down the driveway',
+);
+// true
+
+tokenizer.searchString(
+  '"big red balls"',
+  'the big red ball rolls down the driveway',
+);
+// false
+
+tokenizer.searchString(
+  "'big red balls'",
+  'the big red ball rolls down the driveway',
+);
+// true
+
+tokenizer.searchString(
+  "'red big ball'",
+  'the big red ball rolls down the driveway',
+);
+// false
 ```
 
 ## Options

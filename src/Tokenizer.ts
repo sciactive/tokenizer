@@ -31,11 +31,7 @@ export type SearchNotTerm = {
 
 export type SearchSeriesTerm = {
   type: 'series';
-  tokens: {
-    input: string;
-    token: number;
-    nostemmed: boolean;
-  }[];
+  tokens: SearchTerm[];
 };
 
 type InterimSearchQuery = (
@@ -142,6 +138,7 @@ export class Tokenizer {
         for (let tokens of detailed.tokens) {
           if (tokens.length === 1) {
             seriesTerm.tokens.push({
+              type: 'token',
               input: tokens[0].input,
               token: tokens[0].token,
               nostemmed: context === 'doublequote',
@@ -153,6 +150,7 @@ export class Tokenizer {
               ) || tokens[0];
 
             seriesTerm.tokens.push({
+              type: 'token',
               input: selectedToken.input,
               token: selectedToken.token,
               nostemmed: context === 'doublequote',
@@ -162,6 +160,7 @@ export class Tokenizer {
               tokens.find((token) => !token.stem) || tokens[tokens.length - 1];
 
             seriesTerm.tokens.push({
+              type: 'token',
               input: unstemmedToken.input,
               token: unstemmedToken.token,
               nostemmed: context === 'doublequote',
@@ -264,7 +263,7 @@ export class Tokenizer {
         i--;
         continue;
       } else if (term.type === 'series' && term.tokens.length === 1) {
-        interimQuery[i] = { type: 'token', ...term.tokens[0] };
+        interimQuery[i] = term.tokens[0];
       }
     }
 
@@ -538,6 +537,103 @@ export class Tokenizer {
         position: token.position,
         stem: token.stem,
       }));
+  }
+
+  searchString(query: string, input: string) {
+    const tokens = this.tokenize(input);
+    const parsedQuery = this.parseSearchQuery(query);
+
+    const tokenMap: { [k: string]: { position: number; stem: boolean }[] } = {};
+
+    // Build a token map of the input string.
+    for (let token of tokens) {
+      if (!(token.token in tokenMap)) {
+        tokenMap[token.token] = [];
+      }
+
+      tokenMap[token.token].push({
+        position: token.position,
+        stem: token.stem,
+      });
+    }
+
+    const checkToken = (term: SearchTerm) => {
+      if (!(term.token in tokenMap)) {
+        return false;
+      }
+      if (term.nostemmed) {
+        if (!tokenMap[term.token].find((token) => !token.stem)) {
+          return false;
+        }
+      }
+      return true;
+    };
+
+    const checkSeries = (series: SearchSeriesTerm) => {
+      const firstTerm = series.tokens[0];
+
+      if (!(firstTerm.token in tokenMap)) {
+        return false;
+      }
+
+      const firstTokens = tokenMap[firstTerm.token].filter(
+        (token) => !firstTerm.nostemmed || !token.stem,
+      );
+
+      for (let firstToken of firstTokens) {
+        let found = true;
+        for (let i = 1; i < series.tokens.length; i++) {
+          const currentTerm = series.tokens[i];
+          if (!(currentTerm.token in tokenMap)) {
+            return false;
+          }
+          if (
+            !tokenMap[currentTerm.token].find(
+              (token) =>
+                token.position === firstToken.position + i &&
+                (!currentTerm.nostemmed || !token.stem),
+            )
+          ) {
+            found = false;
+            break;
+          }
+        }
+
+        if (found) {
+          return true;
+        }
+      }
+
+      return false;
+    };
+
+    const checkTerm = (
+      term: SearchTerm | SearchOrTerm | SearchNotTerm | SearchSeriesTerm,
+    ): boolean => {
+      if (term.type === 'series') {
+        return checkSeries(term);
+      } else if (term.type === 'not') {
+        return !checkTerm(term.operand);
+      } else if (term.type === 'or') {
+        for (let operand of term.operands) {
+          if (checkTerm(operand)) {
+            return true;
+          }
+        }
+        return false;
+      }
+      return checkToken(term);
+    };
+
+    // Run through the query and check each term.
+    for (let term of parsedQuery) {
+      if (!checkTerm(term)) {
+        return false;
+      }
+    }
+
+    // All terms matched!
+    return true;
   }
 
   splitDomain(domain: string) {
