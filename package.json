@@ -17,9 +17,11 @@
   "scripts": {
     "format": "prettier --write --ignore-path .prettierignore --ignore-unknown .",
     "lint": "prettier --check --ignore-path .prettierignore --ignore-unknown .",
+    "postinstall": "./make-snowball.sh",
     "prepare": "husky && npm run lint && npm run clean && npm run build",
     "clean": "test -d dist && rm -r dist || true",
     "build": "tsc",
+    "watch": "tsc -w",
     "test": "jest",
     "test:watch": "jest --watch"
   },
@@ -50,7 +52,6 @@
   },
   "dependencies": {
     "@sciactive/splitn": "^3.1.0",
-    "crc-32": "^1.2.2",
-    "jslingua": "^0.13.0"
+    "crc-32": "^1.2.2"
   }
 }

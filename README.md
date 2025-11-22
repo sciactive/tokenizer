@@ -2,7 +2,7 @@
 
 Tokenize string input into 32-bit integers (for full text search and natural language processing).
 
-It works by removing stop words, normalizing text, stemming each word, then tokenizing both the original and the stemmed version of the word. It returns the tokens, along with their position in the text (1 indexed), and whether the token is a stemmed version. Stemmed versions will have the same position as their unstemmed counterparts.
+It works by removing stop words and grammatical punctuation, stemming each word, removing any punctuation, then tokenizing both the original and the stemmed version of the word. It returns the tokens, along with their position in the text (1 indexed), and whether the token is a stemmed version. Stemmed versions will have the same position as their unstemmed counterparts. It uses the [Snowball](https://snowballstem.org/) stemmer.
 
 For email addresses, it will provide the username, domain parts, and the whole domain as stemmed tokens, then the whole address as an unstemmed token.
 
@@ -35,36 +35,30 @@ const tokens = tokenizer.tokenize(input);
 //   { token: -668454185, position: 4, stem: false },
 //   { token: 1835329032, position: 5, stem: true },
 //   { token: 364389343, position: 5, stem: false },
-//   { token: -1323595880, position: 6, stem: false }
+//   { token: -1323595880, position: 6, stem: false },
 // ]
 
 const detailed = tokenizer.detailedTokenize(input);
 // {
-//   original: [ 'natural', 'language', 'string', 'input', 'goes', 'here' ],
-//   stemmed: [ 'natur', 'languag', 'string', 'input', 'goe', 'here' ],
+//   original: ['natural', 'language', 'string', 'input', 'goes', 'here'],
+//   stemmed: ['natur', 'languag', 'string', 'input', 'goe', 'here'],
 //   tokens: [
 //     [
 //       { input: 'natur', token: -603851912, position: 1, stem: true },
-//       { input: 'natural', token: -1167464141, position: 1, stem: false }
+//       { input: 'natural', token: -1167464141, position: 1, stem: false },
 //     ],
 //     [
 //       { input: 'languag', token: 1865099040, position: 2, stem: true },
-//       { input: 'language', token: -723816011, position: 2, stem: false }
+//       { input: 'language', token: -723816011, position: 2, stem: false },
 //     ],
-//     [
-//       { input: 'string', token: -1631669591, position: 3, stem: false }
-//     ],
-//     [
-//       { input: 'input', token: -668454185, position: 4, stem: false }
-//     ],
+//     [{ input: 'string', token: -1631669591, position: 3, stem: false }],
+//     [{ input: 'input', token: -668454185, position: 4, stem: false }],
 //     [
 //       { input: 'goe', token: 1835329032, position: 5, stem: true },
-//       { input: 'goes', token: 364389343, position: 5, stem: false }
+//       { input: 'goes', token: 364389343, position: 5, stem: false },
 //     ],
-//     [
-//       { input: 'here', token: -1323595880, position: 6, stem: false }
-//     ]
-//   ]
+//     [{ input: 'here', token: -1323595880, position: 6, stem: false }],
+//   ],
 // }
 
 //
@@ -214,9 +208,10 @@ tokenizer.searchString(
 
 The config object includes the following options:
 
-- `stopWords`: The stop word list. Defaults to the `sciactive` list.
-- `language`: A language from `listLanguages()`. Defaults to `'eng'`.
-- `stemmingAlgorithm`: A stemming algorithm from `listStemmingAlgorithms(language)`. Defaults to `'porter'`.
+- `stopWords`: The stop word list. Defaults to the `english` list from `StopWords`.
+- `language`: A language from the Snowball stemmers. Defaults to `'english'`. This can also be used to choose a different stemmer for the same language, like `'porter'` for the original Porter English stemmer.
+- `trimGrammarPunctuation`: A function to remove grammatical punctuation from around a word. Shouldn't remove semantic punctuation, like the dollar sign ($). (Ex: "'something.'" -> "something")
+- `removePunctuation`: A function to remove all punctuation from a word. (Ex: "isn't" -> "isnt")
 
 ## `tokenize`
 
@@ -228,23 +223,15 @@ This function gives more detail, including the original tokens, the stemmed vers
 
 ## Other Languages
 
-To use the tokenizer for other languages, you can use the static functions to see what other languages and stemming algorithms are available and get the stop list for a language. Don't forget to set the stop word list for the language you're using.
-
-Note that the stop word list for English returned by `getLanguageStopWords('eng')` is much longer than the default stop word list (the `sciactive` list).
+To use the tokenizer for other languages, you can provide a language algorithm from the [Snowball algorithms list](https://github.com/snowballstem/snowball/tree/v3.0.1/algorithms). Don't forget to set the stop word list for the language you're using.
 
 ```ts
-import { Tokenizer } from '@sciactive/tokenizer';
+import { Tokenizer, StopWords } from '@sciactive/tokenizer';
 
-// Get the available languages and features for your language.
-const supportedLanguages = Tokenizer.listLanguages();
-const frenchStemmingAlgorithms = Tokenizer.listStemmingAlgorithms('fra');
-const frenchStopWordList = Tokenizer.getLanguageStopWords('fra');
-
-// You must set all of `language`, `stemmingAlgorithm`, and `stopWords` for non-English support.
+// You must set both `language` and `stopWords` for non-English support.
 const tokenizer = new Tokenizer({
-  language: 'fra',
-  stemmingAlgorithm: 'snowball',
-  stopWords: Tokenizer.getLanguageStopWords('fra'),
+  language: 'french',
+  stopWords: StopWords.french,
 });
 
 const tokens = tokenizer.tokenize(
@@ -252,7 +239,7 @@ const tokens = tokenizer.tokenize(
 );
 
 // Original: j'ai envie taco bell vais aller voiture restaurant acheter toute nourriture
-// Stemmed: jai envi taco bel vais aller voitur restaur achet tout nourritur
+// Stemmed: ai envi taco bel vais aller voitur restaur achet tout nourritur
 ```
 
 # License

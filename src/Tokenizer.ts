@@ -1,8 +1,8 @@
 import CRC32 from 'crc-32';
-import JsLingua from 'jslingua';
 import { splitn } from '@sciactive/splitn';
 
-import { sciactive } from './stopwords.js';
+import { StopWords } from './StopWords.js';
+import { Stemmers } from './Stemmers.js';
 
 type InterimOrTerm = {
   type: 'interimor';
@@ -49,36 +49,40 @@ export type SearchQuery = (
 )[];
 
 export class Tokenizer {
-  public Morpho: any;
+  public stemmer: any;
+  public trimGrammarPunctuation: (word: string) => string;
+  public removePunctuation: (word: string) => string;
   public stopWords: { [k: string]: number };
 
-  static listLanguages(): string[] {
-    return JsLingua.llang('morpho');
-  }
-
-  static listStemmingAlgorithms(language: string): string[] {
-    const Morpho = JsLingua.gserv('morpho', language);
-    return Morpho.lstem();
-  }
-
-  static getLanguageStopWords(language: string): { [k: string]: number } {
-    const Morpho = JsLingua.gserv('morpho', language);
-    return Morpho.stop_words;
-  }
-
   constructor({
-    stopWords = sciactive,
-    language = 'eng',
-    stemmingAlgorithm = 'porter',
+    stopWords = StopWords.english,
+    language = 'english',
+    trimGrammarPunctuation = (word: string) =>
+      word
+        .replace(
+          /[\u2000-\u206F\u2E00-\u2E7F\\'!"&()*,\-.\/:;<=>?@\[\]^_`{|}~]+$/g,
+          () => '',
+        )
+        .replace(
+          /^[\u2000-\u206F\u2E00-\u2E7F\\'!"&()*,\-.\/:;<=>?@\[\]^_`{|}~]+/g,
+          () => '',
+        ),
+    removePunctuation = (word: string) =>
+      word.replace(
+        /[\u2000-\u206F\u2E00-\u2E7F\\'!"#$%&()*+,\-.\/:;<=>?@\[\]^_`{|}~]+/g,
+        () => '',
+      ),
   }: {
     stopWords?: { [k: string]: number };
-    language?: string;
-    stemmingAlgorithm?: string;
+    language?: keyof typeof Stemmers;
+    trimGrammarPunctuation?: (word: string) => string;
+    removePunctuation?: (word: string) => string;
   } = {}) {
     this.stopWords = stopWords;
-    this.Morpho = JsLingua.gserv('morpho', language);
 
-    this.Morpho.sstem(stemmingAlgorithm);
+    this.stemmer = new Stemmers[language]();
+    this.trimGrammarPunctuation = trimGrammarPunctuation;
+    this.removePunctuation = removePunctuation;
   }
 
   parseSearchQuery(input: string) {
@@ -370,20 +374,18 @@ export class Tokenizer {
   }
 
   detailedTokenize(input: string) {
-    const words: string[] = this.Morpho.gwords(
-      input
-        .trim()
-        .replace(/(\w),(\w)/g, '$1 $2')
-        .replace(/(\d),(\w)/g, '$1 $2')
-        .replace(/(\w),(\d)/g, '$1 $2'),
-    )
-      .filter((word: string | null) => word != null && !!word.match(/\w/))
-      .map((word: string) =>
-        word
-          .replace(/[)\]}:;.?!…‽"']$/g, () => '')
-          .replace(/^[([{"']/g, () => ''),
-      )
-      .filter((word: string) => word != '');
+    const words: string[] = input
+      .trim()
+      .replace(/\x00-\x1f\x7F\x80-\x9F/g, () => '')
+      .replace(/“|”/g, '"')
+      .replace(/‘|’/g, "'")
+      .replace(/(\w),(\w)/g, '$1 $2')
+      .replace(/(\d),(\w)/g, '$1 $2')
+      .replace(/(\w),(\d)/g, '$1 $2')
+      .split(/(?:[,;])?\s+/)
+      .filter((word: string | null) => word != null)
+      .map(this.trimGrammarPunctuation)
+      .filter((word: string) => this.removePunctuation(word) != '');
 
     let outputOrig: string[] = [];
     let outputStem: string[] = [];
@@ -458,15 +460,19 @@ export class Tokenizer {
         outputTokens.push(tokens);
       } else {
         // Handle everything else.
-        let newWords: string[] = this.Morpho.gwords(
-          this.Morpho.norm(this.Morpho.stem(word)),
-        )
-          .filter((word: string | null) => word != null && word != '')
-          .map((word: string) => this.Morpho.stem(word).toLowerCase() as string)
+        let newWords: string[] = word
+          .split(/(?:[,;])?\s+/)
+          .filter((word: string | null) => word != null)
+          .map((word: string) => word.toLowerCase() as string)
           .map((word: string) => word.split('-'))
           .flat()
-          .map((word: string) => word.replace(/\W+/, () => '').trim())
-          .filter((word: string) => word != '');
+          .map(
+            this.stemmer.stemWord.bind(this.stemmer) as (
+              word: string,
+            ) => string,
+          )
+          .map((word: string) => this.removePunctuation(word).trim())
+          .filter((word: string | null) => word != null && word != '');
 
         newWords = newWords
           .map((curWord) => {

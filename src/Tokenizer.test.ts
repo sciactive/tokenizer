@@ -4,9 +4,15 @@ import {
   LONG_REALISTIC_INPUT_DETAILED,
   LONG_REALISTIC_INPUT_TOKENS,
 } from './testArtifacts.js';
-import { Tokenizer } from './index.js';
+import { Tokenizer, Stemmers, StopWords } from './index.js';
 
 describe('Tokenizer', () => {
+  it('stems', () => {
+    const english = new Stemmers.english();
+
+    expect(english.stemWord('running')).toEqual('run');
+  });
+
   it('tokenizes English', () => {
     const input = `This is an example string that contains some basic English text.`;
 
@@ -100,17 +106,14 @@ And there you have it, papácita.
       { token: -1477183844, position: 9, stem: false },
       { token: -1326410499, position: 10, stem: false },
       { token: 733764931, position: 11, stem: false },
-      { token: 1022026391, position: 12, stem: true },
-      { token: 134610293, position: 12, stem: true },
+      { token: 1238256857, position: 12, stem: true },
       { token: -340070397, position: 12, stem: false },
-      { token: -1234660522, position: 13, stem: true },
-      { token: -678964540, position: 13, stem: true },
       { token: 234310360, position: 13, stem: false },
       { token: 937258619, position: 14, stem: false },
       { token: 1739204639, position: 15, stem: false },
       { token: -1957498244, position: 16, stem: false },
       { token: 1956642256, position: 17, stem: false },
-      { token: -1737897102, position: 18, stem: true },
+      { token: -2048992490, position: 18, stem: true },
       { token: -604311376, position: 18, stem: false },
       { token: -1935407826, position: 19, stem: false },
       { token: 1150072890, position: 20, stem: true },
@@ -131,7 +134,7 @@ And there you have it, papácita.
       { token: -1481439722, position: 30, stem: true },
       { token: -428368115, position: 30, stem: false },
       { token: 900120062, position: 31, stem: false },
-      { token: 1900713806, position: 32, stem: true },
+      { token: -406222805, position: 32, stem: true },
       { token: 1132546706, position: 32, stem: false },
       { token: 223244161, position: 33, stem: false },
       { token: -764108410, position: 34, stem: true },
@@ -147,7 +150,6 @@ And there you have it, papácita.
       { token: -1225109831, position: 36, stem: true },
       { token: -2142303079, position: 36, stem: true },
       { token: -87252393, position: 36, stem: false },
-      { token: 1410168347, position: 37, stem: true },
       { token: 600520759, position: 37, stem: false },
     ]);
     expect(tokenizer.detailedTokenize(input)).toEqual({
@@ -203,15 +205,13 @@ And there you have it, papácita.
         'head',
         'cut',
         'off',
-        'is',
-        'not',
-        'go',
-        'to',
+        'aint',
+        'gonna',
         'take',
         'no',
         'more',
         'just',
-        'try',
+        'tri',
         'see',
         'donni',
         'benet',
@@ -225,12 +225,12 @@ And there you have it, papácita.
         'sometim',
         'jump',
         'went',
-        'everywh',
+        'everywher',
         'address',
         'hperrin+myself@example.com',
         'websit',
         'https://example.com/thisisaurl/?querypart=success%20man',
-        'papcita',
+        'papácita',
       ],
       tokens: [
         [{ input: 'past', token: 1343504775, position: 1, stem: false }],
@@ -255,21 +255,16 @@ And there you have it, papácita.
         [{ input: 'cut', token: -1326410499, position: 10, stem: false }],
         [{ input: 'off', token: 733764931, position: 11, stem: false }],
         [
-          { input: 'is', token: 1022026391, position: 12, stem: true },
-          { input: 'not', token: 134610293, position: 12, stem: true },
+          { input: 'aint', token: 1238256857, position: 12, stem: true },
           { input: "ain't", token: -340070397, position: 12, stem: false },
         ],
-        [
-          { input: 'go', token: -1234660522, position: 13, stem: true },
-          { input: 'to', token: -678964540, position: 13, stem: true },
-          { input: 'gonna', token: 234310360, position: 13, stem: false },
-        ],
+        [{ input: 'gonna', token: 234310360, position: 13, stem: false }],
         [{ input: 'take', token: 937258619, position: 14, stem: false }],
         [{ input: 'no', token: 1739204639, position: 15, stem: false }],
         [{ input: 'more', token: -1957498244, position: 16, stem: false }],
         [{ input: 'just', token: 1956642256, position: 17, stem: false }],
         [
-          { input: 'try', token: -1737897102, position: 18, stem: true },
+          { input: 'tri', token: -2048992490, position: 18, stem: true },
           { input: 'trying', token: -604311376, position: 18, stem: false },
         ],
         [{ input: 'see', token: -1935407826, position: 19, stem: false }],
@@ -319,7 +314,7 @@ And there you have it, papácita.
         ],
         [{ input: 'went', token: 900120062, position: 31, stem: false }],
         [
-          { input: 'everywh', token: 1900713806, position: 32, stem: true },
+          { input: 'everywher', token: -406222805, position: 32, stem: true },
           { input: 'everywhere', token: 1132546706, position: 32, stem: false },
         ],
         [{ input: 'address', token: 223244161, position: 33, stem: false }],
@@ -372,10 +367,7 @@ And there you have it, papácita.
             stem: false,
           },
         ],
-        [
-          { input: 'papcita', token: 1410168347, position: 37, stem: true },
-          { input: 'papácita', token: 600520759, position: 37, stem: false },
-        ],
+        [{ input: 'papácita', token: 600520759, position: 37, stem: false }],
       ],
     });
   });
@@ -388,7 +380,6 @@ And there you have it, papácita.
     });
 
     expect(tokenizer.tokenize(input)).toEqual([
-      { token: 905126349, position: 1, stem: true },
       { token: -17923545, position: 1, stem: false },
       { token: 1022026391, position: 2, stem: false },
       { token: -1758133178, position: 3, stem: false },
@@ -411,7 +402,7 @@ And there you have it, papácita.
         'basic',
       ],
       stemmed: [
-        'thi',
+        'this',
         'is',
         'an',
         'string',
@@ -421,10 +412,7 @@ And there you have it, papácita.
         'basic',
       ],
       tokens: [
-        [
-          { input: 'thi', token: 905126349, position: 1, stem: true },
-          { input: 'this', token: -17923545, position: 1, stem: false },
-        ],
+        [{ input: 'this', token: -17923545, position: 1, stem: false }],
         [{ input: 'is', token: 1022026391, position: 2, stem: false }],
         [{ input: 'an', token: -1758133178, position: 3, stem: false }],
         [{ input: 'string', token: -1631669591, position: 4, stem: false }],
@@ -439,62 +427,16 @@ And there you have it, papácita.
     });
   });
 
-  it('uses a different stemming algorithm', () => {
-    const input = `This is an example string that contains some basic English text.`;
-
-    const tokenizer = new Tokenizer({
-      stemmingAlgorithm: 'lancaster',
-    });
-
-    expect(tokenizer.tokenize(input)).toEqual([
-      { token: -1997076268, position: 1, stem: true },
-      { token: 1861000095, position: 1, stem: false },
-      { token: -1631669591, position: 2, stem: false },
-      { token: 1274017736, position: 3, stem: true },
-      { token: -1896191362, position: 3, stem: false },
-      { token: 33078332, position: 4, stem: true },
-      { token: -1871088301, position: 4, stem: false },
-      { token: 21884436, position: 5, stem: true },
-      { token: 746783232, position: 5, stem: false },
-      { token: 999008199, position: 6, stem: false },
-    ]);
-    expect(tokenizer.detailedTokenize(input)).toEqual({
-      original: ['example', 'string', 'contains', 'basic', 'english', 'text'],
-      stemmed: ['exampl', 'string', 'contain', 'bas', 'engl', 'text'],
-      tokens: [
-        [
-          { input: 'exampl', token: -1997076268, position: 1, stem: true },
-          { input: 'example', token: 1861000095, position: 1, stem: false },
-        ],
-        [{ input: 'string', token: -1631669591, position: 2, stem: false }],
-        [
-          { input: 'contain', token: 1274017736, position: 3, stem: true },
-          { input: 'contains', token: -1896191362, position: 3, stem: false },
-        ],
-        [
-          { input: 'bas', token: 33078332, position: 4, stem: true },
-          { input: 'basic', token: -1871088301, position: 4, stem: false },
-        ],
-        [
-          { input: 'engl', token: 21884436, position: 5, stem: true },
-          { input: 'english', token: 746783232, position: 5, stem: false },
-        ],
-        [{ input: 'text', token: 999008199, position: 6, stem: false }],
-      ],
-    });
-  });
-
   it('tokenizes French', () => {
     const input = `J'ai envie de Taco Bell. Je vais aller en voiture au restaurant et acheter toute la nourriture.`;
 
     const tokenizer = new Tokenizer({
-      language: 'fra',
-      stemmingAlgorithm: 'snowball',
-      stopWords: Tokenizer.getLanguageStopWords('fra'),
+      language: 'french',
+      stopWords: StopWords.french,
     });
 
     expect(tokenizer.tokenize(input)).toEqual([
-      { token: -225897218, position: 1, stem: true },
+      { token: 156340709, position: 1, stem: true },
       { token: 5577476, position: 1, stem: false },
       { token: 587086219, position: 2, stem: true },
       { token: -1785536821, position: 2, stem: false },
@@ -529,7 +471,7 @@ And there you have it, papácita.
         'nourriture',
       ],
       stemmed: [
-        'jai',
+        'ai',
         'envi',
         'taco',
         'bel',
@@ -543,7 +485,7 @@ And there you have it, papácita.
       ],
       tokens: [
         [
-          { input: 'jai', token: -225897218, position: 1, stem: true },
+          { input: 'ai', token: 156340709, position: 1, stem: true },
           { input: "j'ai", token: 5577476, position: 1, stem: false },
         ],
         [
