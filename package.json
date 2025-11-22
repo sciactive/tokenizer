@@ -1,6 +1,6 @@
 {
   "name": "@sciactive/tokenizer",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "description": "Tokenize string input into 32-bit integers (for full text search and natural language processing).",
   "type": "module",
   "main": "dist/index.js",
