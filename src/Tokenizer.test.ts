@@ -4,7 +4,7 @@ import {
   LONG_REALISTIC_INPUT_DETAILED,
   LONG_REALISTIC_INPUT_TOKENS,
 } from './testArtifacts.js';
-import { Tokenizer } from './Tokenizer.js';
+import { Tokenizer } from './index.js';
 
 describe('Tokenizer', () => {
   it('tokenizes English', () => {
