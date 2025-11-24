@@ -423,7 +423,7 @@ export class Tokenizer {
         }
 
         outputStem.push(orig);
-        outputTokens.push(tokens);
+        outputTokens.push([...new Map(tokens).entries()]);
       } else if (/^\w+:\/\/\S+$/.test(word)) {
         // Handle URLs.
         const [proto, domainpath] = splitn(orig, '://', 2);
@@ -439,7 +439,7 @@ export class Tokenizer {
         tokens.push([orig, false]);
 
         outputStem.push(orig);
-        outputTokens.push(tokens);
+        outputTokens.push([...new Map(tokens).entries()]);
       } else if (/^\w+(?:[-.+=_]\w+)+$/.test(word)) {
         // Handle conjoined words, like domain.names, hyphenated-words, etc.
 
@@ -457,7 +457,7 @@ export class Tokenizer {
         }
 
         outputStem.push(...parts);
-        outputTokens.push(tokens);
+        outputTokens.push([...new Map(tokens).entries()]);
       } else {
         // Handle everything else.
         let newWords: string[] = word
@@ -486,23 +486,28 @@ export class Tokenizer {
           })
           .flat();
 
+        let tokens: [string, boolean][] = [];
+
         if (newWords.length) {
           outputStem.push(...newWords);
         }
 
         if (newWords.length || orig != '') {
           if (newWords.includes(orig) || orig == '') {
-            outputTokens.push(
-              newWords.map((newWord) => [newWord, newWord !== orig]),
+            tokens.push(
+              ...newWords.map(
+                (newWord) => [newWord, newWord !== orig] as [string, boolean],
+              ),
             );
           } else {
-            outputTokens.push([
+            tokens.push(
               ...newWords.map(
                 (newWord) => [newWord, true] as [string, boolean],
               ),
               [orig, false],
-            ]);
+            );
           }
+          outputTokens.push([...new Map(tokens).entries()]);
         }
       }
     }

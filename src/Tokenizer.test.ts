@@ -76,6 +76,100 @@ describe('Tokenizer', () => {
     });
   });
 
+  it('only returns one of each token per position', () => {
+    const input = `example@example.com example-example example.example.com https://example.example.com`;
+
+    const tokenizer = new Tokenizer();
+
+    expect(tokenizer.tokenize(input)).toEqual([
+      { token: 1861000095, position: 1, stem: true },
+      { token: 1689700070, position: 1, stem: true },
+      { token: -1225109831, position: 1, stem: true },
+      { token: -875998594, position: 1, stem: false },
+      { token: 1861000095, position: 2, stem: true },
+      { token: -1472562623, position: 2, stem: false },
+      { token: 1861000095, position: 3, stem: true },
+      { token: 1689700070, position: 3, stem: true },
+      { token: -1225109831, position: 3, stem: true },
+      { token: 178974056, position: 3, stem: false },
+      { token: 1056335270, position: 4, stem: true },
+      { token: 1861000095, position: 4, stem: true },
+      { token: 1689700070, position: 4, stem: true },
+      { token: -1225109831, position: 4, stem: true },
+      { token: 178974056, position: 4, stem: true },
+      { token: -1452502032, position: 4, stem: false },
+    ]);
+    expect(tokenizer.detailedTokenize(input)).toEqual({
+      original: [
+        'example@example.com',
+        'example-example',
+        'example.example.com',
+        'https://example.example.com',
+      ],
+      stemmed: [
+        'example@example.com',
+        'example',
+        'example',
+        'example',
+        'example',
+        'com',
+        'example.com',
+        'https://example.example.com',
+      ],
+      tokens: [
+        [
+          { input: 'example', token: 1861000095, position: 1, stem: true },
+          { input: 'com', token: 1689700070, position: 1, stem: true },
+          { input: 'example.com', token: -1225109831, position: 1, stem: true },
+          {
+            input: 'example@example.com',
+            token: -875998594,
+            position: 1,
+            stem: false,
+          },
+        ],
+        [
+          { input: 'example', token: 1861000095, position: 2, stem: true },
+          {
+            input: 'example-example',
+            token: -1472562623,
+            position: 2,
+            stem: false,
+          },
+        ],
+        [
+          { input: 'example', token: 1861000095, position: 3, stem: true },
+          { input: 'com', token: 1689700070, position: 3, stem: true },
+          { input: 'example.com', token: -1225109831, position: 3, stem: true },
+          {
+            input: 'example.example.com',
+            token: 178974056,
+            position: 3,
+            stem: false,
+          },
+        ],
+        [
+          { input: 'https', token: 1056335270, position: 4, stem: true },
+          { input: 'example', token: 1861000095, position: 4, stem: true },
+          { input: 'com', token: 1689700070, position: 4, stem: true },
+          { input: 'example.com', token: -1225109831, position: 4, stem: true },
+          {
+            input: 'example.example.com',
+            token: 178974056,
+            position: 4,
+            stem: true,
+          },
+          {
+            input: 'https://example.example.com',
+            token: -1452502032,
+            position: 4,
+            stem: false,
+          },
+        ],
+      ],
+    });
+  });
+
   it('tokenizes some fancy stuff', () => {
     const input = `
 For the past two years, I have been running around like a first-born chicken with its head cut off.
