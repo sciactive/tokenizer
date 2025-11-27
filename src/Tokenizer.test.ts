@@ -76,6 +76,42 @@ describe('Tokenizer', () => {
     });
   });
 
+  it('tokenizes a formatted email address', () => {
+    const input = `"Hunter Perrin" <hperrin@gmail.com>`;
+
+    const tokenizer = new Tokenizer();
+
+    expect(tokenizer.tokenize(input)).toEqual([
+      { token: 1255640165, position: 1, stem: false },
+      { token: 1665408199, position: 2, stem: false },
+      { token: -139239272, position: 3, stem: true },
+      { token: -1655558380, position: 3, stem: true },
+      { token: 1689700070, position: 3, stem: true },
+      { token: 268896735, position: 3, stem: true },
+      { token: -58593779, position: 3, stem: false },
+    ]);
+    expect(tokenizer.detailedTokenize(input)).toEqual({
+      original: ['hunter', 'perrin', 'hperrin@gmail.com'],
+      stemmed: ['hunter', 'perrin', 'hperrin@gmail.com'],
+      tokens: [
+        [{ input: 'hunter', token: 1255640165, position: 1, stem: false }],
+        [{ input: 'perrin', token: 1665408199, position: 2, stem: false }],
+        [
+          { input: 'hperrin', token: -139239272, position: 3, stem: true },
+          { input: 'gmail', token: -1655558380, position: 3, stem: true },
+          { input: 'com', token: 1689700070, position: 3, stem: true },
+          { input: 'gmail.com', token: 268896735, position: 3, stem: true },
+          {
+            input: 'hperrin@gmail.com',
+            token: -58593779,
+            position: 3,
+            stem: false,
+          },
+        ],
+      ],
+    });
+  });
+
   it('only returns one of each token per position', () => {
     const input = `example@example.com example-example example.example.com https://example.example.com`;
 
