@@ -1,6 +1,6 @@
 {
   "name": "@sciactive/tokenizer",
-  "version": "3.0.1",
+  "version": "3.0.2",
   "description": "Tokenize string input into 32-bit integers (for full text search and natural language processing).",
   "type": "module",
   "main": "dist/index.js",
@@ -17,8 +17,7 @@
   "scripts": {
     "format": "prettier --write --ignore-path .prettierignore --ignore-unknown .",
     "lint": "prettier --check --ignore-path .prettierignore --ignore-unknown .",
-    "postinstall": "./make-snowball.sh",
-    "prepare": "husky && npm run lint && npm run clean && npm run build",
+    "prepare": "husky && npm run lint && ./make-snowball.sh && npm run clean && npm run build",
     "clean": "test -d dist && rm -r dist || true",
     "build": "tsc",
     "watch": "tsc -w",
