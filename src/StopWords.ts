@@ -983,6 +983,142 @@ export const StopWords = {
     zero: 1,
   },
 
+  spanish: {
+    // Articles (Artículos)
+    el: 1, // the (masc. singular)
+    la: 1, // the (fem. singular)
+    los: 1, // the (masc. plural)
+    las: 1, // the (fem. plural)
+    un: 1, // a / an (masc.)
+    una: 1, // a / an (fem.)
+    unos: 1, // some (masc.)
+    unas: 1, // some (fem.)
+    // Prepositions (Preposiciones)
+    a: 1, // to / at
+    // ante: 1, // before
+    // bajo: 1, // under
+    con: 1, // with
+    // contra: 1, // against
+    de: 1, // of / from
+    // desde: 1, // from / since
+    // durante: 1, // during
+    en: 1, // in / on
+    entre: 1, // between
+    // hacia: 1, // toward
+    // hasta: 1, // until
+    para: 1, // for / in order to
+    por: 1, // for / by / through
+    sin: 1, // without
+    sobre: 1, // about / on
+    tras: 1, // after
+    // Conjunctions (Conjunciones)
+    y: 1, // and
+    e: 1, // and (before i-/hi- sound)
+    o: 1, // or
+    u: 1, // or (before o-/ho- sound)
+    pero: 1, // but
+    sino: 1, // but rather
+    aunque: 1, // although
+    que: 1, // that
+    porque: 1, // because
+    si: 1, // if
+    mientras: 1, // while
+    // Pronouns (Pronombres)
+    yo: 1, // I
+    tú: 1, // you (informal)
+    él: 1, // he
+    ella: 1, // she
+    ello: 1, // it
+    nosotros: 1, // we
+    nosotras: 1, // we (fem.)
+    vosotros: 1, // you (plural, informal Spain)
+    vosotras: 1, // you (plural, fem., Spain)
+    ellos: 1, // they (masc./mixed)
+    ellas: 1, // they (fem.)
+    me: 1, // me
+    te: 1, // you (object)
+    se: 1, // himself / herself / itself
+    nos: 1, // us
+    os: 1, // you (plural object, Spain)
+    lo: 1, // it (direct object, masc.)
+    // la: 1, // it (direct object, fem.)
+    // los: 1, // them (masc.)
+    // las: 1, // them (fem.)
+    le: 1, // to him / to her
+    les: 1, // to them
+    mi: 1, // my
+    mis: 1, // my (plural)
+    tu: 1, // your
+    tus: 1, // your (plural)
+    su: 1, // his / her / their
+    sus: 1, // his / her / their (plural)
+    este: 1, // this (masc.)
+    esta: 1, // this (fem.)
+    estos: 1, // these (masc.)
+    estas: 1, // these (fem.)
+    eso: 1, // that
+    esto: 1, // this (neutral)
+    aquello: 1, // that (over there)
+    // algo: 1, // something
+    // nada: 1, // nothing
+    // alguien: 1, // someone
+    // nadie: 1, // no one
+    // todo: 1, // everything
+    // todos: 1, // everyone / all
+    cada: 1, // each
+    cual: 1, // which
+    cuales: 1, // which (plural)
+    // Common Verbs (Auxiliary / Copular Forms)
+    ser: 1, // to be
+    es: 1, // is
+    son: 1, // are
+    soy: 1, // am
+    eres: 1, // are
+    era: 1, // was
+    fueron: 1, // were
+    estar: 1, // to be
+    está: 1, // is
+    están: 1, // are
+    estaba: 1, // was
+    hay: 1, // there is / there are
+    haber: 1, // to have (auxiliary)
+    ha: 1, // has
+    han: 1, // have
+    había: 1, // had
+    tener: 1, // to have
+    tiene: 1, // has
+    tienen: 1, // have
+    hacer: 1, // to do / to make
+    hace: 1, // does / makes
+    hacen: 1, // do / make
+    poder: 1, // can / to be able
+    puede: 1, // can
+    pueden: 1, // can
+    deber: 1, // must / should
+    debe: 1, // must
+    deben: 1, // must
+    ir: 1, // to go
+    va: 1, // goes
+    van: 1, // go
+    // Adverbs and Other High-Frequency Words
+    no: 1, // no / not
+    sí: 1, // yes
+    ya: 1, // already
+    aún: 1, // still
+    muy: 1, // very
+    más: 1, // more
+    menos: 1, // less
+    también: 1, // also
+    tampoco: 1, // neither
+    así: 1, // thus / like this
+    aquí: 1, // here
+    allí: 1, // there
+    entonces: 1, // then
+    // siempre: 1, // always
+    // nunca: 1, // never
+    // casi: 1, // almost
+  },
+
   french: {
     afin: 1,
     au: 1,
