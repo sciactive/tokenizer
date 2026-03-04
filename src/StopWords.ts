@@ -1072,6 +1072,7 @@ export const StopWords = {
     // Common Verbs (Auxiliary / Copular Forms)
     ser: 1, // to be
     es: 1, // is
+    somos: 1, // are
     son: 1, // are
     soy: 1, // am
     eres: 1, // are
@@ -1079,16 +1080,19 @@ export const StopWords = {
     fueron: 1, // were
     estar: 1, // to be
     está: 1, // is
+    estás: 1, // is
+    estamos: 1, // are
     están: 1, // are
     estaba: 1, // was
+    estoy: 1, // am
     hay: 1, // there is / there are
     haber: 1, // to have (auxiliary)
     ha: 1, // has
     han: 1, // have
     había: 1, // had
-    tener: 1, // to have
-    tiene: 1, // has
-    tienen: 1, // have
+    // tener: 1, // to have
+    // tiene: 1, // has
+    // tienen: 1, // have
     hacer: 1, // to do / to make
     hace: 1, // does / makes
     hacen: 1, // do / make
