@@ -995,6 +995,7 @@ export const StopWords = {
     unas: 1, // some (fem.)
     // Prepositions (Preposiciones)
     a: 1, // to / at
+    al: 1, // to the
     // ante: 1, // before
     // bajo: 1, // under
     con: 1, // with
