@@ -242,6 +242,12 @@ const tokens = tokenizer.tokenize(
 // Stemmed: ai envi taco bel vais aller voitur restaur achet tout nourritur
 ```
 
+# Human Authorship
+
+This project adheres to the [SciActive Human Contribution Policy](HUMAN-CONTRIBUTION-POLICY.md).
+
+[![Seal of Human Authorship](https://sciactive.com/wp-content/uploads/2026/03/Seal-of-Human-Authorship-300.png)](https://sciactive.com/human-contribution-policy/)
+
 # License
 
 Copyright 2025 SciActive Inc
